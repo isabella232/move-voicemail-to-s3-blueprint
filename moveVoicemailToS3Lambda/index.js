@@ -17,7 +17,7 @@ exports.handler = async (event) => {
 
     try {
         //TODO: need to handle paged returns on Voicemails
-        const vmList = getVoicemailFromQueue(vmQueueId);
+        const vmList = await getVoicemailFromQueue(vmQueueId);
         const filteredVmList = vmList.entities.filter(vm => vm.conversation.id === conversationId);
         if(!Array.isArray(filteredVmList) || !filteredVmList.length){
             //it may take the voicemail a few minutes to be available from the time the end event is sent.  Going to fail if
