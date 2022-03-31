@@ -14,10 +14,11 @@ exports.handler = async (event) => {
     console.log(`Incoming event: ${JSON.stringify(event)}`);
     const conversationId = event.detail.eventBody.conversationId;
     const vmQueueId = event.detail.eventBody.queueId;
-
+    await setupGcClient();
+    const vmAPI = new platformClient.VoicemailApi();
     try {
         //TODO: need to handle paged returns on Voicemails
-        const vmList = await getVoicemailFromQueue(vmQueueId);
+        const vmList = await vmAPI.getVoicemailQueueMessages(vmQueueId);
         const filteredVmList = vmList.entities.filter(vm => vm.conversation.id === conversationId);
         if(!Array.isArray(filteredVmList) || !filteredVmList.length){
             //it may take the voicemail a few minutes to be available from the time the end event is sent.  Going to fail if
@@ -38,7 +39,7 @@ exports.handler = async (event) => {
         handleError(err);
     }
 };
-async function getVoicemailFromQueue(vmQueueId){
+async function setupGcClient(){
     const pendingSecret = await getSecret(secretArn);
     const secretValue = JSON.parse(pendingSecret.SecretString);
 
@@ -46,9 +47,6 @@ async function getVoicemailFromQueue(vmQueueId){
     const gcClient = platformClient.ApiClient.instance;
     gcClient.setEnvironment(genesysCloudRegion);
     gcClient.setAccessToken(secretValue.accessToken);
-
-    const vmAPI = new platformClient.VoicemailApi();
-    return await vmAPI.getVoicemailQueueMessages(vmQueueId);
 }
 async function uploadToS3(mediaFileUri, vmKey) {
     const options = {
