@@ -22,13 +22,13 @@ Accessing voicemail recordings API endpoints requires a user context.  We will d
 newly created voicemails from Genesys to AWS S3.  While this is a simple use case, the principles here are transferable 
 to other APIs that require a user context.  Do note, that without maintaining a per-user Authorization Code Grant Oauth 
 Client, you will not be able to access direct dialed voicemails.  This example will only be dealing with queue based 
-voicemails but could be extended to group based voice mails as well.
+voicemails but could be extended to group based voice mails as well with some modifications.
 
 If you need a process to move direct dialed voicemails, it is recommended that you include that in another process that 
 your agent must interact with and ideally already log into Genesys with.  This becomes an "attended" process and is a 
 more typical approach for a process that uses an Authorization Code Grant.
 
-//Arch diagram
+// TODO Arch diagram
 
 As you can see we are going to leverage 2 lambdas.  The RefreshAuthToken Lambda will be responsible for rotating the 
 secret and will be triggered by AWS Secrets manager, and it's rotation schedule. The MoveVoicemailToS3 will be 
@@ -44,7 +44,10 @@ that will be sent over the AWS EventBridge.
 * [Genesys Oauth Overview](https://developer.genesys.cloud/authorization/platform-auth/)
 * [Authorization Code Oauth Grant](https://developer.genesys.cloud/authorization/platform-auth/use-authorization-code)
 
-
+### Prerequisites
+* Install NodeJS on your local machine.  Download and installation instructions are [here](https://nodejs.org/en/download/)
+* Set up a GenesysCloud queue and allow Voicemails to be left on it.  While there are many options, you can do this easily  
+  in Architect. https://help.mypurecloud.com/articles/manage-acd-voicemail-recordings/ 
 ## Genesys Cloud account setup
 As stated above we will want to set up another a separate System Account to manage the voice mail downloads.  
 * Create a role that will allow you to fetch the user details and the voicemails for the system user with the following 
@@ -118,3 +121,12 @@ easily manually once the secret is created as well.
   * Click Next
 #### Step 4
   * Review and click Store
+
+## Set up the Lambda to upload your voicemails to S3
+At this point you have set up your secret in Secrets Manager.  The access_token should be refreshed daily.  Now we can
+look at setting up the process to use the access_token!  Please refer to the 
+[moveVoicemailToS3Lambda README](../movevoicemailtos3/README.md) for details.
+
+## Conclusion
+We have set up a secret to be rotated by Secrets Manager and an EventBridge integration that will trigger a Lambda
+to download the accompanying queue based voicemail from GenesysCloud and then upload it to an S3 bucket.   
