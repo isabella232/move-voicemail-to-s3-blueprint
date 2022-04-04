@@ -125,7 +125,7 @@ easily manually once the secret is created as well.
 ## Set up the Lambda to upload your voicemails to S3
 At this point you have set up your secret in Secrets Manager.  The access_token should be refreshed daily.  Now we can
 look at setting up the process to use the access_token!  Please refer to the 
-[moveVoicemailToS3Lambda README](../movevoicemailtos3/README.md) for details.
+[moveVoicemailToS3Lambda README](../../movevoicemailtos3/README.md) for details.
 
 ## Conclusion
 We have set up a secret to be rotated by Secrets Manager and an EventBridge integration that will trigger a Lambda
