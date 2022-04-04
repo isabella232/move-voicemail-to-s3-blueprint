@@ -36,7 +36,7 @@ pattern for your S3 bucket you created above.
     * Click the "Environment Variables" tab and add the following variables:
       * Key|Value
       * AWS_CLOUD_REGION|<Region where your secret and S3 bucket are located>
-      * GENESYS_CLOUD_REGION|<GenesysCloud region where your org is running>
+      * GENESYS_CLOUD_REGION|<Genesys Cloud region where your org is running>
       * S3_BUCKET|<Name of your S3 bucket>
       * SECRET_ARN|<ARN of your Secret in Secrets Manager>
 * Create the install package to upload to your Lambda function
@@ -51,7 +51,7 @@ pattern for your S3 bucket you created above.
 To invoke this Lambda we will leverage EventBridge to tell us when a Voicemail has ended for this queue.  The setup of
 EventBridge is well beyond the scope of this document.  Please see the documentation for that here: 
 [EventBridge Installation/Configuration](https://help.mypurecloud.com/articles/about-the-amazon-eventbridge-integration/)
-* On the GenesysCloud side you will need to specify the `v2.detail.events.conversation.{id}.voicemail.end` topic in the 
+* On the Genesys Cloud side you will need to specify the `v2.detail.events.conversation.{id}.voicemail.end` topic in the 
 integration's configuration.
 * On the AWS side you will need to set up a Rule on your Event Bus so that when an event comes in, this Lambda is 
 invoked.  In order to accomplish that, you will want to specify an event patter like so on your rule.
@@ -59,7 +59,7 @@ invoked.  In order to accomplish that, you will want to specify an event patter 
     {
       "account": ["<your AWS account number>"],
       "detail-type": ["v2.detail.events.conversation.{id}.voicemail.end"],
-      "detail.eventBody.queueId": ["<the GenesysCloud QueueId that the voicemails will be left on."]
+      "detail.eventBody.queueId": ["<the Genesys Cloud QueueId that the voicemails will be left on."]
     } 
   ```
 * Once the EventBridge is set up you are done with this Lambda setup.

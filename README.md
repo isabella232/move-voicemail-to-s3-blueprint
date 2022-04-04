@@ -28,11 +28,11 @@ If you need a process to move direct dialed voicemails, it is recommended that y
 your agent must interact with and ideally already log into Genesys with.  This becomes an "attended" process and is a 
 more typical approach for a process that uses an Authorization Code Grant.
 
-### GenesysCloud Token Refresh
-![GenesysCloud Token Refresh](./documentation/Refresh%20Token.png)
+### Genesys Cloud Token Refresh
+![Genesys Cloud Token Refresh](./documentation/Refresh%20Token.png)
 
-### GenesysCloud Voicemail Download
-![GenesysCloud Download Voicemail](./documentation/Download%20Voicemail.png)
+### Genesys Cloud Voicemail Download
+![Genesys Cloud Download Voicemail](./documentation/Download%20Voicemail.png)
 
 As you can see we are going to leverage 2 lambdas.  The RefreshAuthToken Lambda will be responsible for rotating the 
 secret and will be triggered by AWS Secrets manager, and it's rotation schedule. The MoveVoicemailToS3 will be 
@@ -50,7 +50,7 @@ that will be sent over the AWS EventBridge.
 
 ### Prerequisites
 * Install NodeJS on your local machine.  Download and installation instructions are [here](https://nodejs.org/en/download/)
-* Set up a GenesysCloud queue and allow Voicemails to be left on it.  While there are many options, you can do this easily  
+* Set up a Genesys Cloud queue and allow Voicemails to be left on it.  While there are many options, you can do this easily  
   in Architect. https://help.mypurecloud.com/articles/manage-acd-voicemail-recordings/ 
 ## Genesys Cloud account setup
 As stated above we will want to set up another a separate System Account to manage the voice mail downloads.  
@@ -133,4 +133,4 @@ look at setting up the process to use the access_token!  Please refer to the
 
 ## Conclusion
 We have set up a secret to be rotated by Secrets Manager and an EventBridge integration that will trigger a Lambda
-to download the accompanying queue based voicemail from GenesysCloud and then upload it to an S3 bucket.   
+to download the accompanying queue based voicemail from Genesys Cloud and then upload it to an S3 bucket.   
