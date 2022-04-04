@@ -28,7 +28,11 @@ If you need a process to move direct dialed voicemails, it is recommended that y
 your agent must interact with and ideally already log into Genesys with.  This becomes an "attended" process and is a 
 more typical approach for a process that uses an Authorization Code Grant.
 
-// TODO Arch diagram
+### GenesysCloud Token Refresh
+![GenesysCloud Token Refresh](./documentation/Refresh%20Token.png)
+
+### GenesysCloud Voicemail Download
+![GenesysCloud Download Voicemail](./documentation/Download%20Voicemail.png)
 
 As you can see we are going to leverage 2 lambdas.  The RefreshAuthToken Lambda will be responsible for rotating the 
 secret and will be triggered by AWS Secrets manager, and it's rotation schedule. The MoveVoicemailToS3 will be 
