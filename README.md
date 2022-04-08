@@ -57,6 +57,8 @@ As stated above we will want to set up another a separate System Account to mana
 * Create a role that will allow you to fetch the user details and the voicemails for the system user with the following 
 permissions:
   * Analytics > User Detail > View
+  * Conversation > Communication > Disconnect
+  * Voicemail > ACD voicemail > Delete
   * Voicemail > ACD voicemail > View
 * Because you will also need to set up an oauth client for this user you can temporarily add the following permissions 
 to that role or create a new role for these and remove that role after you get the Oauth client created:

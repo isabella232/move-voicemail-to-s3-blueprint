@@ -39,6 +39,10 @@ pattern for your S3 bucket you created above.
       * GENESYS_CLOUD_REGION|<Genesys Cloud region where your org is running>
       * S3_BUCKET|<Name of your S3 bucket>
       * SECRET_ARN|<ARN of your Secret in Secrets Manager>
+      * PAGE_SIZE|The number of voicemails you want to deal with in a page.  Defaults to 20 if not set
+      * DELETE_AFTER_UPLOAD|To delete the voicemail after it is uploaded, set this to true.
+      * MARK_READ_AFTER_UPLOAD|To mark the voicemail as read after upload, set this to true.
+      * DISCONNECT_CALLBACK|To keep the interaction from going to an agent set this to true.
 * Create the install package to upload to your Lambda function
     * Navigate to the folder that contains this README.md in a terminal window.  (This requires that NodeJS is installed
       locally as specified in the main [README](../README.md))
