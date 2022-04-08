@@ -72,7 +72,7 @@ to that role or create a new role for these and remove that role after you get t
   * In the "Authorized redirect URIs" add https://www.getpostman.com/oauth2/callback if you want to use postman to 
 create the credentials.  Feel free to do your own here if you know how to do this already.  As long as we end up with
 an access token and a refresh token then we are good.
-  * In the scope field specify "voicemail"
+  * In the scope field specify "voicemail" and "conversations"
   * Click save.  This should give you the Client Id and the Client Secret.  Note these values as you will need them to 
 fetch the access token and the refresh token 
 * You can now remove the role or permissions from the role that give you access to the Admin menu and create Oauth clients.
