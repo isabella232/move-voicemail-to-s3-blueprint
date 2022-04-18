@@ -40,11 +40,21 @@ async function createSecret(arn, token) {
             return;
         }
     }
-    const newSecretVal = await getNewSecret(arn);
+    try {
+        const newSecretVal = await getNewSecret(arn);
 
-    const putSecretCommand = new PutSecretValueCommand({SecretId: arn, ClientRequestToken: token, SecretString: JSON.stringify(newSecretVal), VersionStages: ['AWSPENDING']});
-    await secretManagerClient.send(putSecretCommand);
-    console.log("Pending secret created successfully!");
+        const putSecretCommand = new PutSecretValueCommand({
+            SecretId: arn,
+            ClientRequestToken: token,
+            SecretString: JSON.stringify(newSecretVal),
+            VersionStages: ['AWSPENDING']
+        });
+        await secretManagerClient.send(putSecretCommand);
+        console.log("Pending secret created successfully!");
+    } catch (err) {
+        logStepFailure(arn, "Create", err);
+        throw err;
+    }
 }
 async function getNewSecret(arn){
     //get current secret value.
@@ -63,77 +73,68 @@ async function getNewSecret(arn){
     return newSecretVal;
 }
 async function testSecret(arn) {
-    const pendingSecret = await getPendingSecret(arn);
-    const secretValue = JSON.parse(pendingSecret.SecretString);
-
-    //Create the Genesys Cloud client
-    const gcClient = platformClient.ApiClient.instance;
-    gcClient.setAccessToken(secretValue.accessToken);
-    const userAPI = new platformClient.UsersApi();
-    let user;
     try {
-        user = await userAPI.getUsersMe();
-    } catch (err) {
-        handleError(err);
-    }
+        const pendingSecret = await getPendingSecret(arn);
+        const secretValue = JSON.parse(pendingSecret.SecretString);
 
-    if(user){
-        console.log(`test was successful. User: ${JSON.stringify(user)}`);
-    }else{
-       throw {
+        //Create the Genesys Cloud client
+        const gcClient = platformClient.ApiClient.instance;
+        gcClient.setAccessToken(secretValue.accessToken);
+        const userAPI = new platformClient.UsersApi();
+
+        const user = await userAPI.getUsersMe();
+        if(user){
+            console.log(`test was successful. User: ${JSON.stringify(user)}`);
+        }else{
+            throw {
                 name: "UserNotFoundException",
                 errorMessage: `Unable to find the user for clientId: ${secretValue.clientId} for the pending secret`
-       };
+            };
+        }
+    } catch (err) {
+        logStepFailure(arn, "Test", err);
+        throw err;
     }
-
 }
 async function finishSecret(arn, token) {
-    const secretMeta = await describeSecret(arn);
-    let currentVersion;
-    for(const versionId in secretMeta.VersionIdsToStages) {
-        if ("AWSCURRENT" === secretMeta.VersionIdsToStages[versionId][0]) {
-            if (versionId === token) {
-                console.log(`Version ${versionId} is already the AWSCURRENT for arn: ${arn}. Returning as the secret already rotated.`);
-                return;
-            }
-            currentVersion = versionId;
-        }
-    }
-
-    //update the pending secret to the current
-    const updateSecretVersionCommand = new UpdateSecretVersionStageCommand(
-        {
-            SecretId: arn,
-            VersionStage: "AWSCURRENT",
-            MoveToVersionId: token,
-            RemoveFromVersionId: currentVersion
-        }
-    );
     try {
+        const secretMeta = await describeSecret(arn);
+        let currentVersion;
+        for(const versionId in secretMeta.VersionIdsToStages) {
+            if ("AWSCURRENT" === secretMeta.VersionIdsToStages[versionId][0]) {
+                if (versionId === token) {
+                    console.log(`Version ${versionId} is already the AWSCURRENT for arn: ${arn}. Returning as the secret already rotated.`);
+                    return;
+                }
+                currentVersion = versionId;
+            }
+        }
+
+        //update the pending secret to the current
+        const updateSecretVersionCommand = new UpdateSecretVersionStageCommand(
+            {
+                SecretId: arn,
+                VersionStage: "AWSCURRENT",
+                MoveToVersionId: token,
+                RemoveFromVersionId: currentVersion
+            }
+        );
+
         await secretManagerClient.send(updateSecretVersionCommand);
         console.log(`Version ${currentVersion} is now the AWSCURRENT for arn: ${arn}`);
     } catch (err) {
-        handleError(err);
+        logStepFailure(arn, "Finish", err);
+        throw err;
     }
 }
 async function describeSecret(arn){
-    let secret;
-    try {
-        const secretCommand = new DescribeSecretCommand({SecretId: arn});
-        secret = await secretManagerClient.send(secretCommand);
-    } catch (err) {
-        handleError(err);
-    }
+    const secretCommand = new DescribeSecretCommand({SecretId: arn});
+    const secret = await secretManagerClient.send(secretCommand);
     return secret;
 }
 async function getSecretByStage(arn, stage) {
-    let secretVal = "not found";
-    try {
-        const getSecretValCommand = new GetSecretValueCommand({SecretId: arn, VersionStage: stage});
-        secretVal = await secretManagerClient.send(getSecretValCommand);
-    } catch (err) {
-        handleError(err);
-    }
+    const getSecretValCommand = new GetSecretValueCommand({SecretId: arn, VersionStage: stage});
+    const secretVal = await secretManagerClient.send(getSecretValCommand);
     return secretVal;
 }
 async function getCurrentSecret(arn){
@@ -142,7 +143,6 @@ async function getCurrentSecret(arn){
 async function getPendingSecret(arn){
     return await getSecretByStage(arn, "AWSPENDING");
 }
-function handleError(err) {
-    console.error(err);
-    throw err;
+function logStepFailure(step, arn, err) {
+    console.error(`Secret Rotation Failed in the ${step} Step for arn: ${arn}. Error: ${JSON.stringify(err)}`);
 }
